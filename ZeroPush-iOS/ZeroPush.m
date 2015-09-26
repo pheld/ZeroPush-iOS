@@ -69,24 +69,11 @@ static NSString *const ZeroPushClientVersion = @"ZeroPush-iOS/2.1.0";
     return self;
 }
 
-- (void)registerForRemoteNotificationTypes:(UIRemoteNotificationType)types;
-{
-    [[UIApplication sharedApplication] registerForRemoteNotificationTypes:types];
-}
-
 - (void)registerForRemoteNotifications
 {
-#ifdef __IPHONE_8_0
-    if ([[UIApplication sharedApplication] respondsToSelector:@selector(registerUserNotificationSettings:)]) {
-        UIUserNotificationSettings* notificationSettings = [UIUserNotificationSettings settingsForTypes:(UIUserNotificationTypeAlert | UIUserNotificationTypeBadge | UIUserNotificationTypeSound) categories:nil];
-        [[UIApplication sharedApplication] registerUserNotificationSettings:notificationSettings];
-        [[UIApplication sharedApplication] registerForRemoteNotifications];
-    } else {
-        [[UIApplication sharedApplication] registerForRemoteNotificationTypes: (UIRemoteNotificationTypeBadge | UIRemoteNotificationTypeSound | UIRemoteNotificationTypeAlert)];
-    }
-#else
-    [[UIApplication sharedApplication] registerForRemoteNotificationTypes: (UIRemoteNotificationTypeBadge | UIRemoteNotificationTypeSound | UIRemoteNotificationTypeAlert)];
-#endif
+  UIUserNotificationSettings* notificationSettings = [UIUserNotificationSettings settingsForTypes:(UIUserNotificationTypeAlert | UIUserNotificationTypeBadge | UIUserNotificationTypeSound) categories:nil];
+  [[UIApplication sharedApplication] registerUserNotificationSettings:notificationSettings];
+  [[UIApplication sharedApplication] registerForRemoteNotifications];
 }
 
 - (NSDictionary *)userInfoForData:(id)data andResponse:(NSHTTPURLResponse *)response
@@ -134,18 +121,18 @@ static NSString *const ZeroPushClientVersion = @"ZeroPush-iOS/2.1.0";
     if ([self.deviceToken length] == 0) {
         return;
     }
-    
+
     NSMutableDictionary *params = [NSMutableDictionary dictionary];
     [params setObject:self.deviceToken forKey:@"device_token"];
-    
-    
+
+
     NSString *url = [NSString stringWithFormat:@"%@/unregister", ZeroPushAPIURLHost];
 
     [self HTTPRequest:@"DELETE"
                   url:url
                params:params
         errorSelector:@selector(tokenUnregistrationDidFailWithError:)];
-    
+
     self.deviceToken = @"";
 }
 
@@ -357,7 +344,7 @@ static NSString *const ZeroPushClientVersion = @"ZeroPush-iOS/2.1.0";
         NSInteger statusCode = [response statusCode];
 
         //if 300, we need to manually follow redirects
-        
+
         if (statusCode >= 400) {
             NSDictionary *userInfo = [self userInfoForData:data andResponse:response];
             NSError *apiError = [NSError errorWithDomain:@"com.zeropush.api" code:statusCode userInfo:userInfo];
